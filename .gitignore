@@ -1,0 +1,12 @@
+# My personal notes; will swap to documentation soon enough
+.reference.md
+
+# Test Files
+*.turmac
+test.py
+*.bf
+
+# My Rust Learning File --- will port thing to Rust once I learn it.
+.learn_rust/
+
+pyrightconfig.json
