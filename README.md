@@ -1,6 +1,6 @@
 # TURMAC
 
-**TURMAC** (Turing-Machine Abstract Calculus) is a brutalist, minimalist esoteric programming language focused on expressiveness through constraint. It is designed to investigate the boundaries of Turing completeness, symbolic computation, and the implementation of low-level logic using minimal syntax.
+**TURMAC** (TURing MAChine) is a brutalist, minimalist esoteric programming language focused on expressiveness through constraint. It is designed to investigate the boundaries of Turing completeness, symbolic computation, and the implementation of low-level logic using minimal syntax.
 
 > TURMAC is not intended to be practical—its value lies in what it reveals about computation, not what it replaces.
 
@@ -40,10 +40,10 @@ TURMAC is an esolang inspired by languages like [Brainfuck](https://esolangs.org
 ## Example: Fibonacci Sequence
 
 ```turmac
-stdin           ; Read number n
+stdin           
 
 mv %2
-%2 1 +          ; F_1 = 1
+%2 1 +          
 
 flag condition
 mv %0
@@ -54,16 +54,16 @@ end
 
 flag no
 mv %1
-stdout          ; Print F_0
+stdout          
 
 mv %3
-%2 0 +          ; temp = F_1
+%2 0 +          
 
 mv %2
-%2 %1 +         ; F_n = F_(n-1) + F_(n-2)
+%2 %1 +         
 
 mv %1
-%3 0 +          ; F_(n-2) = temp
+%3 0 +          
 
 mv %0
 %0 1 -
