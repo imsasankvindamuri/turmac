@@ -5,8 +5,3 @@
 *.turmac
 test.py
 *.bf
-
-# My Rust Learning File --- will port thing to Rust once I learn it.
-.learn_rust/
-
-pyrightconfig.json

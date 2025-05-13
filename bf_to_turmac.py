@@ -1,34 +1,68 @@
 import sys
+from pathlib import Path
 
 if __name__ == "__main__":
-    bf_code = open(sys.argv[1]).read()
+    file = Path(sys.argv[1])
+    bf_commands : list[str] = [
+            "+" , "-" , "." , "," ,
+            ">" , "<" , "[" , "]",
+            ]
+    bf_code : list[str] = [cmd for cmd in file.read_text() if cmd in bf_commands]
+
+    output = Path(f"{file.with_suffix('.turmac')}")
+    output.touch()
+
     turmac_code = []
-    loop_counter = 0
-    loop_stack = []
-    exit_stack = []
-    jump_stack = []
     data_pointer = 0
+    num_loops = 0
+    loop_lable_stack = []
 
-    for tok in bf_code:
-        if tok == "+": turmac_code.append(f"%{data_pointer} 1 + 256 %")
-        elif tok == "-": turmac_code.append(f"%{data_pointer} 1 - 256 %")
-        elif tok == ">": data_pointer += 1 ; turmac_code.append(f"mv %{data_pointer}")
-        elif tok == "<": data_pointer -= 1 ; turmac_code.append(f"mv %{data_pointer}")
-        elif tok == ".": turmac_code.append("stdout")
-        elif tok == ",": turmac_code.append("stdin") ; turmac_code.append(f"%{data_pointer} 256 %")
-        elif tok == "[":
-            loop_counter += 1
-            loop_stack.append(f"loop_{loop_counter}")
-            exit_stack.append(f"exit_{loop_counter}")
-            jump_stack.append(f"jump_{loop_counter}")
-            turmac_code.append(f"flag {jump_stack[-1]}")
-            turmac_code.append(f"is_zero {exit_stack[-1]} {loop_stack[-1]}")
-            turmac_code.append(f"flag {loop_stack[-1]}")
-        elif tok == "]":
-            turmac_code.append(f"is_zero {jump_stack[-1]} {jump_stack[-1]}")
-            turmac_code.append(f"flag {exit_stack[-1]}")
-            loop_stack.pop() ; exit_stack.pop()
-        else:
-            continue
+    for cmd in bf_code:
+        # A naive implementation first.
+        # A more optimized implementation will be done when I port this to Rust.
+        if cmd == "+":
+            turmac_code.append(f"""
+            %{data_pointer} 1 + 256 %
+            """)
+        elif cmd == "-":
+            turmac_code.append(f"""
+            %{data_pointer} 1 - 256 %
+            """)
+        elif cmd == ".":
+            turmac_code.append("""
+            stdout
+            // Please note that TURMAC and BF don't map perfectly
+            // This prints the raw integer value, rather than the ASCII value
+            """)
+        elif cmd == ",":
+            turmac_code.append(f"""
+            stdin\n%{data_pointer} 256 %
+            // Please note that TURMAC and BF don't map perfectly
+            // This takes input and converts into the ASCII value
+            // of a single ASCII character
+            """)
+        elif cmd == ">":
+            data_pointer += 1
+            turmac_code.append(f"""
+            mv %{data_pointer}
+            """)
+        elif cmd == "<":
+            data_pointer -= 1
+            turmac_code.append(f"""
+            mv %{data_pointer}
+            """)
+        elif cmd == "[":
+            num_loops += 1
+            loop_lable_stack.append(num_loops)
+            turmac_code.append(f"""
+            is_zero end_{loop_lable_stack[-1]} loop_{loop_lable_stack[-1]}\nflag loop_{loop_lable_stack[-1]}
+            """)
+        elif cmd == "]":
+            turmac_code.append(f"""
+            is_zero end_{loop_lable_stack[-1]} loop_{loop_lable_stack[-1]}\nflag end_{loop_lable_stack[-1]}
+            """)
+            loop_lable_stack.pop()
 
-    open(sys.argv[2],"w").write("\n".join(turmac_code))
+
+    with output.open("w") as output_file:
+        output_file.write("\n".join([cmd.strip() for cmd in turmac_code]))
